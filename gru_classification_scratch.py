@@ -5,7 +5,7 @@ import numpy as np
 from datasets import FordADataset
 
 class GRU(torch.nn.Module):
-    def __init__(self, num_inputs, num_hiddens, sigma=0.01):
+    def __init__(self, num_inputs, num_hiddens, num_outputs, sigma=0.01):
         super().__init__()
 
         # Gaussian random init with standard deviation *sigma*
@@ -20,16 +20,17 @@ class GRU(torch.nn.Module):
                           nn.Parameter(torch.zeros(num_hiddens)))
 
         # create the parameters for the update gate
-
         self.W_xz, self.W_hz, self.b_z = triple()
 
         # create the parameters for the reset gate
-
         self.W_xr, self.W_hr, self.b_r = triple()
 
         # hidden state parameters
-
         self.W_xh, self.W_hh, self.b_h = triple()
+
+        # readout layer parameters
+        self.fc = nn.Linear(num_hiddens, num_outputs)
+        self.relu = nn.ReLU()
 
     ''' Given that our parent class is nn.Module, what we are doing here is essentially *overloading*
     This is the function that will be called when we pass a batch of inputs to the GRU
@@ -47,14 +48,18 @@ class GRU(torch.nn.Module):
                                torch.matmul(R * H, self.W_hh) + self.b_h)
             H = Z * H + (1 - Z) * H_tilda
             outputs.append(H)
-        return outputs, (H, )
+
+        # readout layer
+        readout = self.fc(self.relu(H))
+
+        return outputs, readout
 
 def train_model(model, dataset, params):
 
     # create the data generator to iterate over mini batches
     trainDataGenerator = torch.utils.data.DataLoader(dataset, **params['train_params'])
 
-    criterion = torch.nn.MSELoss()    
+    criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=params['init_lr'])
 
     for epoch in range(params['num_epochs']):
@@ -63,10 +68,10 @@ def train_model(model, dataset, params):
             optimizer.zero_grad()
 
             # forward pass
-            output, latents = model(data)
+            latent_activities, readout = model(data)
 
             # compute the loss
-            loss = criterion()
+            loss = criterion(readout, label)
 
             # backpropagate through time!
             loss.backward()
@@ -96,7 +101,7 @@ if __name__ == '__main__':
                 }
     }
 
-    model = GRU(params['n_inputs'], params['n_hidden'])
+    model = GRU(params['n_inputs'], params['n_hidden'], params['n_classes'])
     # if you want to port the mode to GPU
     # model = model.to('cuda:0')
 
