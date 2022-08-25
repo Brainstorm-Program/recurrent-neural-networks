@@ -5,13 +5,17 @@ import numpy as np
 from datasets import *
 from models import *
 
-def train_model(model, dataset, params):
+def train_model(model, dataset, params, visualize_train=True):
 
     # create the data generator to iterate over mini batches
     trainDataGenerator = torch.utils.data.DataLoader(dataset, **params['train_params'])
 
     criterion = torch.nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=params['init_lr'])
+
+    if visualize_train:
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
 
     for epoch in range(params['num_epochs']):
 
@@ -35,8 +39,28 @@ def train_model(model, dataset, params):
             optimizer.step()
             optimizer.zero_grad()
             
-            print('loss: {}'.format(loss.item()))
+            if visualize_train:
+                ax.clear()
+                # Let's pick index 0, since batch is shuffled anyway!
+                ax.plot(data[:,0,0].detach().numpy(), linewidth=2, color='tab:gray', label='groundtruth')
+                ax.plot(readout[0,:,0].detach().numpy(), '--', linewidth=2, color='r', label='prediction')
 
+                # Just formatting options. This is my pet peeve so you can safely ignore!
+                ax.spines['top'].set_visible(False)
+                ax.spines['right'].set_visible(False)
+                ax.set_title('Training epoch: {}'.format(epoch))
+                ax.set_xlabel('Time', fontsize=16, fontweight='bold')
+                ax.set_ylabel('Firing rate (in a.u.)', fontsize=16, fontweight='bold')
+                ax.legend(loc='upper right')
+                ax.set_xticks([0., data.shape[0]])
+                ax.set_xticklabels(['0ms', '{}ms'.format(data.shape[0])])
+                ax.set_yticks([])
+                ax.set_ylim([-2.5, 2.5]) 
+                plt.pause(0.1)
+
+            print('Epoch: {} | Training Loss: {}'.format(epoch, loss.item()))
+
+    return model
 
 if __name__ == '__main__':
     
@@ -45,7 +69,7 @@ if __name__ == '__main__':
     params = {
         'n_inputs': 1,
         'n_hidden': 32,
-        'num_epochs': 1000,
+        'num_epochs': 50,
         'init_lr': 1e-2,
         'n_outputs': 1,
 
