@@ -56,11 +56,36 @@ def train_model(model, dataset, params, visualize_train=True):
                 ax.set_xticklabels(['0ms', '{}ms'.format(data.shape[0])])
                 ax.set_yticks([])
                 ax.set_ylim([-2.5, 2.5]) 
+                
                 plt.pause(0.1)
 
             print('Epoch: {} | Training Loss: {}'.format(epoch, loss.item()))
 
     return model
+
+def evaluate_model(model):
+    # First off, let's create a new dataset. Since the initializations are random, we can 
+    # consider this a proper test! To make life harder for the model, lets change up T too
+    N, T = 1024, 2000
+    test_dataset = FitzhughNagumo(N=1024, T=2000)
+
+    # We still need an evaluation criterion
+    criterion = torch.nn.MSELoss()
+ 
+    # Create the data tensors
+    x = torch.Tensor(test_dataset.data_x.reshape(N, T, 1)).permute(1,0,-1)
+    y = torch.Tensor(test_dataset.data_y.reshape(N, T, 1))
+
+    # Compute the feedforward pass. 
+    # But since we aren't training, we can do without the gradients
+    with torch.no_grad():
+        _, pred = model(x)
+        pred = torch.stack(pred).permute(1, 0, -1)
+        test_error = criterion(pred, y).item()
+
+    # Q: How does this compare with the training loss?
+    # What can you say about this?
+    print('Test error: {}'.format(test_error))
 
 if __name__ == '__main__':
     
@@ -80,6 +105,16 @@ if __name__ == '__main__':
                 }
     }
 
+    # initialize the model architecture and set it to train mode
     model = GRU(params['n_inputs'], params['n_hidden'], params['n_outputs'])
+    model = model.train()
 
-    train_model(model, fhDataset, params)
+    # Now let's train the model. 
+    # Pass visualize_train=False to suppress any display
+    model = train_model(model, fhDataset, params)
+
+    # Let's set the model to eval mode, and see its performance on a new random set
+    model = model.eval()
+    evaluate_model(model)
+
+    # This is going to be cool. We can treat RNNs as "generative" models too :)
