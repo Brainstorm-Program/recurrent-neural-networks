@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from datasets import *
 from models import *
+import sklearn.metrics as M
 
 def train_model(model, dataset, params, visualize_train=True):
 
@@ -61,45 +62,72 @@ def train_model(model, dataset, params, visualize_train=True):
                 
                 plt.pause(0.1)
 
-            print('Epoch: {} | Training Loss: {}'.format(epoch, loss.item()))
+        print('Epoch: {} | Training Loss: {}'.format(epoch, loss.item()))
 
     return model
 
 def evaluate_model(model):
     # First off, let's create a new dataset. Since the initializations are random, we can 
     # consider this a proper test! To make life harder for the model, lets change up T too
-    N, T = 1024, 2000
-    test_dataset = FitzhughNagumo(N=1024, T=2000)
-
-    # We still need an evaluation criterion
-    criterion = torch.nn.MSELoss()
+    N, T = 128, 2000
+    test_dataset = FitzhughNagumoClassification(N=N, T=T)
  
     # Create the data tensors
-    x = torch.Tensor(test_dataset.data_x.reshape(N, T, 1)).permute(1,0,-1)
-    y = torch.Tensor(test_dataset.data_y.reshape(N, T, 1))
+    x = test_dataset.data.permute(1,0,-1)
+    y = test_dataset.labels
 
     # Compute the feedforward pass. 
     # But since we aren't training, we can do without the gradients
     with torch.no_grad():
         _, pred = model(x)
-        pred = torch.stack(pred).permute(1, 0, -1)
-        test_error = criterion(pred, y).item()
+        pred = torch.argmax(pred[0], dim=-1)
 
-    # Q: How does this compare with the training loss?
-    # What can you say about this?
-    print('Test error: {}'.format(test_error))
+    # Let's create the confusion matrix
+    cm = M.confusion_matrix(y.numpy(), pred.numpy()).astype(np.float32)
+    # Compute accuracy
+    print('Overall accuracy: {}'.format((cm[0,0]+cm[1,1])/cm.sum()))
+
+    # row normalize
+    cm[0] = cm[0]/cm[0].sum()
+    cm[1] = cm[1]/cm[1].sum()
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.imshow(cm, cmap=plt.get_cmap('YlGn'), vmin=0., vmax=1.)
+
+    for y in range(cm.shape[0]):
+        for x in range(cm.shape[1]):
+            ax.text(x, y, '%.2f' % cm[y, x],
+                 horizontalalignment='center',
+                 verticalalignment='center',
+                 fontsize=16,
+                 color='tab:gray',
+                 fontweight='bold'
+                 )
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_visible(False)
+    ax.spines['bottom'].set_visible(False)
+    ax.set_xticks([])
+    ax.set_yticks([])
+
+    ax.set_ylabel('True label', fontsize=16, fontweight='bold')
+    ax.set_xlabel('Predicted label', fontsize=16, fontweight='bold')
+    plt.savefig('thumbs/cfmat.png', bbox_inches='tight')
+
+    plt.show()
 
 if __name__ == '__main__':
     
     fhDataset = FitzhughNagumoClassification(N=128, T=1000)
 
     # If you are curious uncomment this!
-    fhDataset.visualize_samples()
+    #fhDataset.visualize_samples()
 
     params = {
         'n_inputs': 1,
         'n_hidden': 32,
-        'num_epochs': 50,
+        'num_epochs': 20,
         'init_lr': 1e-2,
         'n_outputs': 2,
 
