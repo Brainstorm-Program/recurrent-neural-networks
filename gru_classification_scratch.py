@@ -100,8 +100,8 @@ def evaluate_model(model):
             ax.text(x, y, '%.2f' % cm[y, x],
                  horizontalalignment='center',
                  verticalalignment='center',
-                 fontsize=16,
-                 color='tab:gray',
+                 fontsize=12,
+                 color='white',
                  fontweight='bold'
                  )
     ax.spines['top'].set_visible(False)
@@ -127,7 +127,7 @@ if __name__ == '__main__':
     params = {
         'n_inputs': 1,
         'n_hidden': 32,
-        'num_epochs': 20,
+        'num_epochs': 50,
         'init_lr': 1e-2,
         'n_outputs': 2,
 
