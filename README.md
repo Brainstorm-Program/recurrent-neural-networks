@@ -16,3 +16,13 @@ Our first goal is to implement the GRU architecture from scratch. You can find t
 To initiate the training process you can essentially run ```python gru_regression_scratch.py```. If you have the `train_visualization` flag set to `True`, you should observe something like this!
 
 ![regTrain](thumbs/fitzhugh_nagumo_regression.gif)
+
+The same script also has code that performs an evaluation of this model on a completely new, randomly generated test set.
+
+### Using the GRU for timeseries classification
+To demonstrate the versatality of RNNs, let's now use them on a classification problem. We have written a ```FitzhughNagumoClassification``` data loader for you to play with. Essentially, the idea is to sample activity traces from two different dynamical systems (let's call them Class A and Class B), and see if we can learn to classify them appropriately. To initiate the training process you can run ```python gru_classification_scratch.py```.
+
+<p float="left">
+  <img src="thumbs/classification.png" width="400" />
+  <img src="thumbs/cfmat.png" width="300" /> 
+</p>
