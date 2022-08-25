@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from datasets import *
 from models import *
+import tqdm
 
 def train_model(model, dataset, params, visualize_train=True):
 
@@ -116,5 +117,3 @@ if __name__ == '__main__':
     # Let's set the model to eval mode, and see its performance on a new random set
     model = model.eval()
     evaluate_model(model)
-
-    # This is going to be cool. We can treat RNNs as "generative" models too :)

@@ -75,6 +75,8 @@ class FitzhughNagumo(Dataset):
         self.I = I
         self.a = a
         self.b = b
+        self.N = N
+        self.T = T
 
         data_x = []
         data_y = []
@@ -102,6 +104,13 @@ class FitzhughNagumo(Dataset):
         out = np.stack((dim1,dim2)).T
 
         return out
+
+    def get_init(self):
+        t = np.linspace(0,400,self.T+1)
+        x0 = np.array([float(np.random.rand(1))*2.-1.,0.])
+        sol = integrate.solve_ivp(self.FHN_rhs, [0,400], x0, t_eval=t)
+        init_x = sol.y[0, :50]
+        return init_x
 
 class FitzhughNagumoClassification(Dataset):
     def __init__(self, N, T):
