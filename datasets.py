@@ -71,7 +71,11 @@ class FordADataset(Dataset):
 
 
 class FitzhughNagumo(Dataset):
-    def __init__(self, N, T):
+    def __init__(self, N, T, I=0.5, a=0.7, b=0.8):
+        self.I = I
+        self.a = a
+        self.b = b
+
         data_x = []
         data_y = []
         for i in range(N):
@@ -91,7 +95,7 @@ class FitzhughNagumo(Dataset):
         return torch.Tensor(self.data_x[idx]), torch.Tensor(self.data_y[idx])
 
     def FHN_rhs(self, t,x):
-        I, a, b = 0.5, 0.7, 0.8
+        I, a, b = self.I, self.a, self.b
         eps = 1./50.
         dim1 = x[0] - (x[0]**3)/3. - x[1] + I
         dim2 = eps*(x[0] + a - b*x[1])
@@ -99,3 +103,7 @@ class FitzhughNagumo(Dataset):
 
         return out
 
+class FitzhughNagumoClassification(Dataset):
+    def __init__(self):
+        classA = FitzhughNagumo(N=1024, T=1000, I=0.2, a=0.5, b=0.2)
+        import ipdb; ipdb.set_trace()
