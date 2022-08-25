@@ -60,7 +60,7 @@ def train_model(model, dataset, params, visualize_train=True):
                 
                 plt.pause(0.1)
 
-            print('Epoch: {} | Training Loss: {}'.format(epoch, loss.item()))
+        print('Epoch: {} | Training Loss: {}'.format(epoch, loss.item()))
 
     return model
 

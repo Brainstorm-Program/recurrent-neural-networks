@@ -60,4 +60,18 @@ class GRU(torch.nn.Module):
 
         return outputs, readouts
 
+    def single_step(self, X, H):
+        matmul_H = lambda A, B: torch.matmul(A, B)
 
+        Z = torch.sigmoid(torch.matmul(X, self.W_xz) + (
+            torch.matmul(H, self.W_hz) if H is not None else 0) + self.b_z)
+        
+        R = torch.sigmoid(torch.matmul(X, self.W_xr) +
+                        torch.matmul(H, self.W_hr) + self.b_r)
+        
+        H_tilda = torch.tanh(torch.matmul(X, self.W_xh) +
+                           torch.matmul(R * H, self.W_hh) + self.b_h)
+        
+        H = Z * H + (1 - Z) * H_tilda
+
+        return H, self.fc(self.relu(H))
