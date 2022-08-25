@@ -104,6 +104,37 @@ class FitzhughNagumo(Dataset):
         return out
 
 class FitzhughNagumoClassification(Dataset):
-    def __init__(self):
-        classA = FitzhughNagumo(N=1024, T=1000, I=0.2, a=0.5, b=0.2)
-        import ipdb; ipdb.set_trace()
+    def __init__(self, N, T):
+
+        # Let's sample data from two distinct dynamical systems
+        classA = FitzhughNagumo(N=N, T=T, I=0.5, a=0.95, b=0.2)
+        classB = FitzhughNagumo(N=N, T=T, I=0.5, a=0.7, b=0.2)
+       
+        # now let's create the dataset with appropriate class labels
+        self.data = torch.Tensor(np.vstack([classA.data_x, classB.data_x])).float()
+        self.labels = torch.Tensor(np.vstack([np.zeros((classA.data_x.shape[0])), np.zeros((classA.data_x.shape[0]))+1])).flatten().long()
+    
+    def __len__(self):
+        return self.data.shape[0]
+
+    def __getitem__(self, idx):
+        return self.data[idx], self.labels[idx]
+
+    def visualize_samples(self): 
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+
+        ax.plot(self.data[0, :, 0], linewidth=2, alpha=0.75, c='tab:orange', label='Class A')
+        ax.plot(self.data[-1, :, 0], linewidth=2, alpha=0.75, c='tab:brown', label='Class B')
+
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.set_xlabel('Time', fontsize=16, fontweight='bold')
+        ax.set_ylabel('Firing rate (in a.u.)', fontsize=16, fontweight='bold')
+        ax.legend(loc='upper right')
+        ax.set_xticks([0., self.data.shape[1]])
+        ax.set_xticklabels(['0ms', '{}ms'.format(self.data.shape[1])])
+        ax.set_yticks([])
+        ax.set_ylim([-2.5, 2.5]) 
+
+        plt.show()
