@@ -4,7 +4,7 @@
 Our goal for this tutorial is to provide you with enough context and supporting code scaffold so that you are able to understand and implement basic RNN architectures. For the purposes of demonstration, we stick to the Gated Recurrent Unit (GRU) here. As always, Google is your friend. We too have relied on several sources for inspiration including D2L.ai (https://d2l.ai/chapter_recurrent-modern), the official PyTorch tutorials (https://pytorch.org/tutorials), and several open-sourced repositories.
 
 ### Let's get started
-Hopefully, we'd have given you a verbal walkthrough of the GRU architecure (also pictured below from d2l.ai)
+At this point you have encountered the GRU architecure (also pictured below from d2l.ai)
 
 ![GRU](thumbs/gru-3.svg)
 
