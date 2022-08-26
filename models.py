@@ -75,3 +75,16 @@ class GRU(torch.nn.Module):
         H = Z * H + (1 - Z) * H_tilda
 
         return H, self.fc(self.relu(H))
+
+
+class torchGRU(nn.Module):
+    def __init__(self, input_size, hidden_size, output_size):
+        super(torchGRU, self).__init__()
+        self.rnn = nn.GRU(input_size,
+                          hidden_size)
+        self.linear = nn.Linear(hidden_size, output_size)
+ 
+    def forward(self, seq, hc=None):
+        tmp, hc = self.rnn(seq, hc)
+        out = self.linear(tmp)
+        return out
