@@ -24,7 +24,7 @@ def train_model(model, dataset, params, visualize_train=True, warm_up=50):
             # The inputs need to be of the form T x B x N_in
             # where T is the total "time" duration of the signal, B is the batch size
             # and N_in is the feature dimensionality of an observation
-            data = data.transpose(0, 1) #.to('cuda:0')
+            data = data.transpose(0, 1)
 
             # forward pass to warm-up
             latent_activities, readout = model(data[:warm_up])
@@ -74,6 +74,33 @@ def train_model(model, dataset, params, visualize_train=True, warm_up=50):
 
     return model
 
+def make_gen_gif(init_x, gen_seq):
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
+    init_len = len(init_x)
+    total_len = len(gen_seq)
+
+    for t in range(init_len, total_len):
+        ax.clear()
+
+        ax.plot(gen_seq[:t], linewidth=2, color='r', label='generated')
+        ax.plot(init_x, linewidth=2, color='tab:gray', label='initialize')
+ 
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.set_xlabel('Time', fontsize=16, fontweight='bold')
+        ax.set_ylabel('Firing rate (in a.u.)', fontsize=16, fontweight='bold')
+        ax.legend(loc='upper right')
+        ax.set_xticks([0., total_len])
+        ax.set_xticklabels(['0ms', '{}ms'.format(total_len)])
+        ax.set_yticks([])
+        ax.set_ylim([-2.5, 2.5]) 
+       
+        plt.savefig('../autoregGRU/img%03d.png'%t, bbox_inches='tight') 
+        #plt.pause(0.1)
+   
 
 def generate(model, init_x, future_T=1000):
     model = model.eval()
@@ -106,19 +133,24 @@ if __name__ == '__main__':
 
     # initialize the model architecture and set it to train mode
     model = GRU(params['n_inputs'], params['n_hidden'], params['n_outputs'])
-    model = model.train()
-    model = model.to('cuda:0')
 
-    # Now let's train the model. 
-    # Pass visualize_train=False to suppress any display
-    model = train_model(model, fhDataset, params, visualize_train=False)
-    torch.save(model.state_dict(), 'autoregressiveGRU.pth')
+    if not os.path.exists(os.path.join('ckpts', 'autoregressiveGRU.pth')):
+        model = model.train()
+
+        # Now let's train the model. 
+        # Pass visualize_train=False to suppress any display
+        model = train_model(model, fhDataset, params, visualize_train=False)
+        torch.save(model.state_dict(), 'autoregressiveGRU.pth')
+
+    else:
+        model.load_state_dict(torch.load(os.path.join('ckpts', 'autoregressiveGRU.pth')))
+
+    model = model.eval()
 
     # This is going to be cool. We can treat RNNs as "generative" models too :)
     # Let's "seed" the model with an initial sequence
     init_x = fhDataset.get_init()
     init_x = torch.Tensor(init_x[:, np.newaxis, np.newaxis])
-    gen_seq = generate(model, init_x)
+    gen_seq = generate(model, init_x, future_T=250)
 
-    plt.plot(gen_seq.squeeze().numpy())
-    plt.show()
+    make_gen_gif(init_x.squeeze().numpy(), gen_seq.squeeze().numpy())
