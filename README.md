@@ -19,6 +19,10 @@ To initiate the training process you can essentially run ```python gru_regressio
 
 The same script also has code that performs an evaluation of this model on a completely new, randomly generated test set.
 
+### Application: Autoregression
+Can RNNs be trained as generative models? The short answer is yes! For more details refer to ```gru_autoregression.py```. We have included a trained model checkpoint, since this might take a bit longer to train!
+![autoReg](thumbs/autoGRU.gif)
+
 ### Using the GRU for timeseries classification
 To demonstrate the versatality of RNNs, let's now use them on a classification problem. We have written a ```FitzhughNagumoClassification``` data loader for you to play with. Essentially, the idea is to sample activity traces from two different dynamical systems (let's call them Class A and Class B), and see if we can learn to classify them appropriately. To initiate the training process you can run ```python gru_classification_scratch.py```.
 
