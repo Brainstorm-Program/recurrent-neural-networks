@@ -1,3 +1,7 @@
+ssh -X <username>@ssh.ccv.brown.edu
+cd ~/brainstorm-ws
+git clone <>
+
 # Brainstorm workshop series
 ## A tutorial on Recurrent Neural Networks (RNNs)
 
