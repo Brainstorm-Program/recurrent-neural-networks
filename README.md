@@ -1,6 +1,8 @@
+```
 ssh -X <username>@ssh.ccv.brown.edu
 cd ~/brainstorm-ws
-git clone <>
+git clone git@github.com:Brainstorm-Program/rnn-tutorial.git
+```
 
 # Brainstorm workshop series
 ## A tutorial on Recurrent Neural Networks (RNNs)
