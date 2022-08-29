@@ -1,10 +1,38 @@
+# Brainstorm workshop series
+
+## Cloning the repository
+For detailed instructions on setting up the common environment and cloning all the repositories, repository see [the common setup instructions](https://github.com/Brainstorm-Program/scripts). For a summary, see below:
+
+Connect to Oscar using SSH (or alternatively, log in using OpenOnDemand and the Oscar shell application.
 ```
-ssh -X <username>@ssh.ccv.brown.edu
-cd ~/brainstorm-ws
-git clone git@github.com:Brainstorm-Program/rnn-tutorial.git
+ssh -XY <username>@ssh.ccv.brown.edu
 ```
 
-# Brainstorm workshop series
+Navigate to your brainstorm-workshop directory:
+```
+cd ~/brainstorm-ws
+```
+
+Load the correct modules and the conda environment with the `gh` command:
+```
+module load anaconda/2022.05
+source /gpfs/data/brainstorm-ws/scripts/simulate-conda-init.sh
+conda activate /gpfs/data/brainstorm-ws/conda-cpu
+```
+
+Clone the repository:
+```
+gh repo clone Brainstorm-Program/recurrent-neural-networks
+```
+
+If the `gh repo clone` command fails, log using the following command and following the on-screen instructions:
+```
+gh auth login
+```
+
+Then rerun `gh repo clone Brainstorm-Program/recurrent-neural-networks`.
+
+
 ## A tutorial on Recurrent Neural Networks (RNNs)
 
 Our goal for this tutorial is to provide you with enough context and supporting code scaffold so that you are able to understand and implement basic RNN architectures. For the purposes of demonstration, we stick to the Gated Recurrent Unit (GRU) here. As always, Google is your friend. We too have relied on several sources for inspiration including D2L.ai (https://d2l.ai/chapter_recurrent-modern), the official PyTorch tutorials (https://pytorch.org/tutorials), and several open-sourced repositories.
